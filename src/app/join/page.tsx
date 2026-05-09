@@ -17,14 +17,14 @@ export default function JoinPage() {
 
   useEffect(() => {
     if (!bgCanvasRef.current) return;
-    const p = new Particles(bgCanvasRef.current, { density: 0.4, speed: 0.9 });
+    const p = new Particles(bgCanvasRef.current, { density: 1.4, speed: 0.9 });
     p.start();
     return () => p.stop();
   }, []);
 
   useEffect(() => {
     if (!dustCanvasRef.current) return;
-    const p = new Particles(dustCanvasRef.current, { density: 0.35, speed: 0.7 });
+    const p = new Particles(dustCanvasRef.current, { density: 1.0, speed: 0.7 });
     p.start();
     return () => p.stop();
   }, []);
@@ -60,11 +60,12 @@ export default function JoinPage() {
               <span className="brand-mark" style={{ transform: "scale(.7)" }} />
               <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: ".18em", fontSize: 11 }}>UPPER ROOM</span>
             </div>
-            <span>CODE · {state.code}</span>
           </div>
 
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/upper-room-window.jpeg" className="phone-window" alt="" />
+
           <div className="phone-q">{state.question}</div>
-          <div className="phone-q-sub">{state.subtitle}</div>
 
           <div className="phone-input-wrap">
             <input
