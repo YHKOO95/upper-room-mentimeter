@@ -17,6 +17,26 @@ function fmtTime(ts: number) {
   return new Date(ts).toLocaleDateString("ko-KR");
 }
 
+function exportCsv(words: WordEntry[], question: string) {
+  const rows = [
+    ["질문", question],
+    [],
+    ["단어", "응답 수", "최근 응답 시각"],
+    ...words
+      .slice()
+      .sort((a, b) => b.count - a.count)
+      .map(w => [w.text, String(w.count), new Date(w.ts).toLocaleString("ko-KR")]),
+  ];
+  const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `upper-room-responses-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function ResponsesPage() {
   const { state, removeWord, decrementWord, clearWords } = useWordStore();
   const [q, setQ] = useState("");
@@ -64,6 +84,13 @@ export default function ResponsesPage() {
           <button className={sortBy === "recent" ? "is-on" : ""} onClick={() => setSortBy("recent")} type="button">최신</button>
           <button className={sortBy === "text" ? "is-on" : ""} onClick={() => setSortBy("text")} type="button">가나다</button>
         </div>
+        <button
+          className="btn btn-sm btn-ghost"
+          onClick={() => exportCsv(state.words, state.question)}
+          type="button"
+        >
+          CSV 내보내기
+        </button>
         <button
           className="btn btn-sm btn-ghost"
           onClick={() => { if (window.confirm("모든 응답을 삭제할까요?")) void clearWords(); }}
