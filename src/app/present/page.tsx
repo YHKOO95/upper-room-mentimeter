@@ -1,45 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Particles } from "@/lib/particles";
 import { WordArt } from "@/lib/wordart";
 import { useWordStore } from "@/lib/word-store";
 import type { WordEntry } from "@/lib/types";
-
-// ── Decorative QR (deterministic from value) ─────────────────────────────────
-function QrSvg({ value, size = 96 }: { value: string; size?: number }) {
-  const CELLS = 21;
-  const grid = useMemo(() => {
-    let h = 2166136261;
-    for (let i = 0; i < value.length; i++) { h ^= value.charCodeAt(i); h = Math.imul(h, 16777619); }
-    const arr: boolean[] = [];
-    for (let y = 0; y < CELLS; y++) {
-      for (let x = 0; x < CELLS; x++) {
-        h ^= h << 13; h ^= h >>> 17; h ^= h << 5;
-        arr.push((h >>> 0) % 100 < 48);
-      }
-    }
-    const set = (x: number, y: number, v: boolean) => { arr[y * CELLS + x] = v; };
-    const finder = (ox: number, oy: number) => {
-      for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) {
-        const edge = x === 0 || y === 0 || x === 6 || y === 6;
-        const inner = x >= 2 && x <= 4 && y >= 2 && y <= 4;
-        set(ox + x, oy + y, edge || inner);
-      }
-    };
-    finder(0, 0); finder(CELLS - 7, 0); finder(0, CELLS - 7);
-    return arr;
-  }, [value]);
-
-  return (
-    <svg className="qr" width={size} height={size} viewBox={`0 0 ${CELLS} ${CELLS}`}>
-      {grid.map((on, i) => on
-        ? <rect key={i} x={i % CELLS} y={Math.floor(i / CELLS)} width="1" height="1" fill="#111" />
-        : null)}
-    </svg>
-  );
-}
 
 // ── Present screen ────────────────────────────────────────────────────────────
 export default function PresentPage() {
@@ -86,8 +53,8 @@ export default function PresentPage() {
 
   const total = state.words.reduce((a, w) => a + w.count, 0);
   const joinUrl = typeof window !== "undefined"
-    ? (window.location.origin + "/join").replace(/^https?:\/\//, "")
-    : "localhost:3000/join";
+    ? window.location.origin + "/join"
+    : "http://localhost:3000/join";
 
   return (
     <div className={`present shape-${state.shape}`}>
@@ -110,7 +77,13 @@ export default function PresentPage() {
           </div>
           <div className="right">
             <div className="qr-card">
-              <QrSvg value={joinUrl} size={96} />
+              <QRCodeSVG
+                value={joinUrl}
+                size={96}
+                bgColor="#ffffff"
+                fgColor="#111111"
+                level="M"
+              />
               <small>SCAN TO JOIN</small>
             </div>
             <div>CODE · <span style={{ color: "var(--ink)", fontWeight: 700, letterSpacing: ".2em" }}>{state.code}</span></div>
