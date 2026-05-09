@@ -31,8 +31,8 @@ const SEED_WORDS = [
 function defaultState(): StoreState {
   return {
     code: DEFAULT_SESSION_CODE,
-    question: "당신의 어퍼룸은 어디인가요?",
-    subtitle: "A SINGLE WORD OR SHORT PHRASE",
+    question: "",
+    subtitle: "",
     shape: DEFAULT_SHAPE,
     words: SEED_WORDS.map(([t, c]) => ({
       id: cryptoId(),

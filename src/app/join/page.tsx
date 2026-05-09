@@ -56,10 +56,8 @@ export default function JoinPage() {
         <canvas ref={dustCanvasRef} className="dust" />
         <div className="phone-inner">
           <div className="phone-head">
-            <div className="brand" style={{ gap: 6 }}>
-              <span className="brand-mark" style={{ transform: "scale(.7)" }} />
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: ".18em", fontSize: 11 }}>UPPER ROOM</span>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/joshua-logo.webp" className="phone-brand-logo" alt="UPPER ROOM" />
           </div>
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -111,16 +109,14 @@ export default function JoinPage() {
         </div>
       </div>
 
-      <p style={{ position: "relative", zIndex: 2, marginTop: 24, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ink-faint)" }}>
-        {isRemote ? "Supabase 실시간 세션" : "로컬 데모 모드"} · <Link href="/present" style={{ color: "var(--warm)", textDecoration: "none" }}>발표 화면 보기</Link>
-      </p>
-
-      <nav className="route-bar">
-        <Link href="/admin" style={{ display: "contents" }}><button type="button">SETUP</button></Link>
-        <button className="is-active" type="button"><span className="dot" />JOIN</button>
-        <Link href="/responses" style={{ display: "contents" }}><button type="button">RESPONSES</button></Link>
-        <Link href="/present" style={{ display: "contents" }}><button type="button">PRESENT</button></Link>
-      </nav>
+      {!isRemote && (
+        <nav className="route-bar">
+          <Link href="/admin" style={{ display: "contents" }}><button type="button">SETUP</button></Link>
+          <button className="is-active" type="button"><span className="dot" />JOIN</button>
+          <Link href="/responses" style={{ display: "contents" }}><button type="button">RESPONSES</button></Link>
+          <Link href="/present" style={{ display: "contents" }}><button type="button">PRESENT</button></Link>
+        </nav>
+      )}
     </div>
   );
 }

@@ -64,11 +64,8 @@ export default function PresentPage() {
         <header className="head">
           <div className="left">
             <div className="eyebrow joshua-eyebrow">
-              <svg viewBox="0 0 100 22" className="joshua-logo" aria-hidden="true">
-                <path d="M6 4 C2 4 2 9 6 9 L8 9 L8 14 C8 17 5 17 5 15" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-                <circle cx="6" cy="3" r="1.2" fill="currentColor" />
-                <text x="14" y="14" fontFamily="var(--font-display)" fontWeight="800" fontSize="13" letterSpacing="2" fill="currentColor">JOSHUA</text>
-              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/joshua-logo.webp" className="present-brand-logo" alt="UPPER ROOM" />
               <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: 999, background: "var(--warm)", marginLeft: 10 }} />
               {" "}26 ONNURI · UPPER ROOM
             </div>
@@ -116,12 +113,14 @@ export default function PresentPage() {
         )}
       </div>
 
-      <nav className="route-bar">
-        <Link href="/admin" style={{ display: "contents" }}><button type="button">SETUP</button></Link>
-        <Link href="/join" style={{ display: "contents" }}><button type="button">JOIN</button></Link>
-        <Link href="/responses" style={{ display: "contents" }}><button type="button">RESPONSES</button></Link>
-        <button className="is-active" type="button"><span className="dot" />{isRemote ? "Live" : "Demo"}</button>
-      </nav>
+      {!isRemote && (
+        <nav className="route-bar">
+          <Link href="/admin" style={{ display: "contents" }}><button type="button">SETUP</button></Link>
+          <Link href="/join" style={{ display: "contents" }}><button type="button">JOIN</button></Link>
+          <Link href="/responses" style={{ display: "contents" }}><button type="button">RESPONSES</button></Link>
+          <button className="is-active" type="button"><span className="dot" />Demo</button>
+        </nav>
+      )}
     </div>
   );
 }
