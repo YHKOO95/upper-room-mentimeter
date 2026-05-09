@@ -1,3 +1,7 @@
+// New shapes — used by wordart.ts, word-store.ts, new pages
+export type ShapeKind = "poster" | "prayer" | "attic" | "stairs" | "house" | "window" | "circle";
+
+// Legacy shapes — used by frames.ts, FrameWordCloud.tsx, demo-store.ts, supabase.ts
 export type FrameKind = "heart" | "circle" | "cross" | "star" | "rounded";
 
 export type FrameConfig = {
@@ -8,6 +12,7 @@ export type FrameConfig = {
   viewBox: string;
 };
 
+// Legacy submission type — kept for supabase.ts / use-wordcloud-session.ts
 export type ParticipantSubmission = {
   id: string;
   sessionCode: string;
@@ -17,11 +22,7 @@ export type ParticipantSubmission = {
   createdAt: string;
 };
 
-export type WordCount = {
-  text: string;
-  value: number;
-};
-
+// Legacy session config — kept for supabase.ts / use-wordcloud-session.ts
 export type SessionConfig = {
   code: string;
   title: string;
@@ -29,6 +30,19 @@ export type SessionConfig = {
   frameId: FrameKind;
   colorTheme: string[];
   isAcceptingResponses: boolean;
+};
+
+// Word entry for the new word-count store
+export type WordEntry = {
+  id: string;
+  text: string;
+  count: number;
+  ts: number;
+};
+
+export type WordCount = {
+  text: string;
+  value: number;
 };
 
 export type PresentationTab = "all" | "room";

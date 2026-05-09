@@ -1,98 +1,125 @@
 "use client";
 
-import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { useWordCloudSession } from "@/lib/use-wordcloud-session";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
+import { Particles } from "@/lib/particles";
+import { useWordStore } from "@/lib/word-store";
 
 export default function JoinPage() {
-  const { isRemote, session, submitResponse } = useWordCloudSession();
-  const [groupName, setGroupName] = useState("");
-  const [roomName, setRoomName] = useState("");
-  const [text, setText] = useState("");
-  const [message, setMessage] = useState("");
+  const { state, isRemote, addWord } = useWordStore();
+  const [val, setVal] = useState("");
+  const [mine, setMine] = useState<{ id: string; text: string }[]>([]);
+  const [thanksKey, setThanksKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const bgCanvasRef = useRef<HTMLCanvasElement>(null);
+  const dustCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setMessage("");
+  useEffect(() => {
+    if (!bgCanvasRef.current) return;
+    const p = new Particles(bgCanvasRef.current, { density: 0.4, speed: 0.9 });
+    p.start();
+    return () => p.stop();
+  }, []);
 
-    if (!groupName.trim() || !roomName.trim() || !text.trim()) {
-      setMessage("그룹, 다락방, 응답을 모두 입력해주세요.");
-      return;
-    }
+  useEffect(() => {
+    if (!dustCanvasRef.current) return;
+    const p = new Particles(dustCanvasRef.current, { density: 0.35, speed: 0.7 });
+    p.start();
+    return () => p.stop();
+  }, []);
 
+  const submit = async () => {
+    const t = val.trim();
+    if (!t || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await submitResponse({
-        groupName: groupName.trim(),
-        roomName: roomName.trim(),
-        text: text.trim(),
-      });
-      setText("");
-      setMessage("응답이 발표 화면에 반영되었습니다.");
-    } catch {
-      setMessage("응답 저장에 실패했습니다. 세션 설정을 확인해주세요.");
+      await addWord(t);
+      setMine(m => [{ id: Math.random().toString(36).slice(2, 8), text: t }, ...m].slice(0, 8));
+      setVal("");
+      setThanksKey(n => n + 1);
+      inputRef.current?.focus();
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") void submit();
+  };
 
   return (
-    <main className="min-h-screen bg-[#f4f6fb] px-5 py-8 text-slate-950">
-      <div className="mx-auto max-w-xl">
-        <Link className="text-sm font-bold text-slate-500" href="/">
-          홈으로
-        </Link>
-        <section className="mt-6 rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200/70 sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-600">
-            Code {session.code}
-          </p>
-          <h1 className="mt-4 text-3xl font-black tracking-tight">{session.question}</h1>
-          <p className="mt-3 text-sm text-slate-500">
-            {isRemote ? "Supabase 실시간 세션에 연결됨" : "로컬 데모 모드로 실행 중"}
-          </p>
+    <div className="participant">
+      <canvas ref={bgCanvasRef} className="bg" />
 
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-            <label className="block">
-              <span className="text-sm font-bold text-slate-700">소속 그룹</span>
-              <input
-                className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-emerald-500"
-                onChange={(event) => setGroupName(event.target.value)}
-                placeholder="예: 1그룹"
-                value={groupName}
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-bold text-slate-700">다락방</span>
-              <input
-                className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-emerald-500"
-                onChange={(event) => setRoomName(event.target.value)}
-                placeholder="예: 믿음 다락방"
-                value={roomName}
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-bold text-slate-700">응답</span>
-              <textarea
-                className="mt-2 min-h-32 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-emerald-500"
-                maxLength={120}
-                onChange={(event) => setText(event.target.value)}
-                placeholder="떠오르는 단어나 짧은 문장을 입력해주세요."
-                value={text}
-              />
-            </label>
+      <div className="phone-frame">
+        <canvas ref={dustCanvasRef} className="dust" />
+        <div className="phone-inner">
+          <div className="phone-head">
+            <div className="brand" style={{ gap: 6 }}>
+              <span className="brand-mark" style={{ transform: "scale(.7)" }} />
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: ".18em", fontSize: 11 }}>UPPER ROOM</span>
+            </div>
+            <span>CODE · {state.code}</span>
+          </div>
+
+          <div className="phone-q">{state.question}</div>
+          <div className="phone-q-sub">{state.subtitle}</div>
+
+          <div className="phone-input-wrap">
+            <input
+              ref={inputRef}
+              className="phone-input"
+              placeholder="한 단어로 적어주세요…"
+              value={val}
+              onChange={e => setVal(e.target.value)}
+              onKeyDown={handleKeyDown}
+              maxLength={24}
+              disabled={isSubmitting}
+              autoFocus
+            />
             <button
-              className="w-full rounded-2xl bg-slate-950 px-5 py-4 font-black text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
-              disabled={isSubmitting || !session.isAcceptingResponses}
-              type="submit"
+              className="phone-send"
+              onClick={() => void submit()}
+              disabled={isSubmitting}
+              aria-label="보내기"
+              type="button"
             >
-              {isSubmitting ? "전송 중..." : "응답 보내기"}
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
-          </form>
+          </div>
+          <div className="phone-helper">{val.length}/24 · 여러 번 보낼 수 있어요</div>
 
-          {message ? <p className="mt-5 rounded-2xl bg-emerald-50 p-4 text-sm font-bold text-emerald-700">{message}</p> : null}
-        </section>
+          {mine.length > 0 && (
+            <>
+              <div className="phone-foot">
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ink-faint)" }}>나의 응답</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ink-faint)" }}>{mine.length}개</span>
+              </div>
+              <div className="my-words">
+                {mine.map(m => <span key={m.id} className="my-word">{m.text}</span>)}
+              </div>
+            </>
+          )}
+
+          <div className={`thanks-flash${thanksKey ? " show" : ""}`} key={thanksKey}>
+            전송됨
+          </div>
+        </div>
       </div>
-    </main>
+
+      <p style={{ position: "relative", zIndex: 2, marginTop: 24, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ink-faint)" }}>
+        {isRemote ? "Supabase 실시간 세션" : "로컬 데모 모드"} · <Link href="/present" style={{ color: "var(--warm)", textDecoration: "none" }}>발표 화면 보기</Link>
+      </p>
+
+      <nav className="route-bar">
+        <Link href="/admin" style={{ display: "contents" }}><button type="button">SETUP</button></Link>
+        <button className="is-active" type="button"><span className="dot" />JOIN</button>
+        <Link href="/responses" style={{ display: "contents" }}><button type="button">RESPONSES</button></Link>
+        <Link href="/present" style={{ display: "contents" }}><button type="button">PRESENT</button></Link>
+      </nav>
+    </div>
   );
 }

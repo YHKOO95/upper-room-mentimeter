@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(cp \"/Users/younghoikoo/.claude/projects/-Users-younghoikoo-Project-upper-room-mentimeter/da42f8cf-944e-4b81-8be8-69c335575e1d/tool-results/webfetch-1778319410170-0vjzpw.bin\" /tmp/design.gz)",
+      "Bash(gunzip -f /tmp/design.gz)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "Bash(mkdir -p /tmp/design-extract)",
+      "Bash(tar -xf /tmp/design -C /tmp/design-extract)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

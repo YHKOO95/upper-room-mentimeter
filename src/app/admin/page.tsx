@@ -1,88 +1,193 @@
 "use client";
 
 import Link from "next/link";
-import { FrameWordCloud } from "@/components/FrameWordCloud";
-import { frames } from "@/lib/frames";
-import { readLocalSession, saveLocalSession } from "@/lib/demo-store";
-import { supabase } from "@/lib/supabase";
-import type { FrameKind } from "@/lib/types";
-import { useWordCloudSession } from "@/lib/use-wordcloud-session";
+import { useEffect, useRef } from "react";
+import { Particles } from "@/lib/particles";
+import { useWordStore } from "@/lib/word-store";
+import type { ShapeKind } from "@/lib/types";
 
-const previewWords = [
-  { text: "감사", value: 8 },
-  { text: "은혜", value: 7 },
-  { text: "공동체", value: 6 },
-  { text: "사랑", value: 5 },
-  { text: "기도", value: 4 },
-  { text: "회복", value: 4 },
-  { text: "소망", value: 3 },
-  { text: "섬김", value: 3 },
-];
+const SHAPE_KEYS: ShapeKind[] = ["poster", "prayer", "attic", "stairs", "house", "window", "circle"];
+const SHAPE_LABELS: Record<ShapeKind, string> = {
+  poster: "포스터 (다락방+손)",
+  prayer: "기도하는 손",
+  attic: "다락방",
+  stairs: "계단 위 다락",
+  house: "단순 집",
+  window: "창문",
+  circle: "원형",
+};
+
+function ShapeIcon({ kind }: { kind: ShapeKind }) {
+  if (kind === "house") return (
+    <svg viewBox="0 0 32 32" fill="none"><path d="M5 26V14L16 6l11 8v12H5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><rect x="13.5" y="15.5" width="5" height="5" fill="currentColor"/></svg>
+  );
+  if (kind === "attic") return (
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M4 28V20h24v8" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M8 20v-7h16v7" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M6 13l10-7 10 7" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+      <rect x="14" y="15" width="4" height="4" fill="currentColor"/>
+      <rect x="22" y="6" width="2" height="4" fill="currentColor"/>
+    </svg>
+  );
+  if (kind === "stairs") return (
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M12 8h8v6h4v4h4v4h4v4H0v-4h4v-4h4v-4h4V8z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M13 7l3-3 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+      <rect x="15" y="9" width="2" height="2" fill="currentColor"/>
+    </svg>
+  );
+  if (kind === "prayer") return (
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M11 28v-6c0-3 .5-6 1.5-9l1-3c.3-.8 1-1.4 1.5-1.4s1.2.6 1.5 1.4l1 3c1 3 1.5 6 1.5 9v6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M11 22c-1.5-.5-3-1.5-3.5-3M21 22c1.5-.5 3-1.5 3.5-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    </svg>
+  );
+  if (kind === "poster") return (
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M2 30c2-10 6-18 14-26 8 8 12 16 14 26" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M11 30V20l5-4 5 4v10z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+      <rect x="14.5" y="21" width="3" height="3" fill="currentColor"/>
+    </svg>
+  );
+  if (kind === "window") return (
+    <svg viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="2" stroke="currentColor" strokeWidth="1.6"/><path d="M6 16h20M16 6v20" stroke="currentColor" strokeWidth="1.6"/></svg>
+  );
+  return (
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="1.6"/><circle cx="16" cy="16" r="2.5" fill="currentColor"/></svg>
+  );
+}
 
 export default function AdminPage() {
-  const { isRemote, session } = useWordCloudSession();
+  const { state, isRemote, updateSession, addWord, clearWords } = useWordStore();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  async function handleFrameChange(frameId: FrameKind) {
-    saveLocalSession({ ...readLocalSession(), ...session, frameId });
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const p = new Particles(canvasRef.current, { density: 0.5, speed: 0.8 });
+    p.start();
+    return () => p.stop();
+  }, []);
 
-    if (supabase) {
-      await supabase.from("presentation_sessions").update({ frame_id: frameId }).eq("code", session.code);
-    }
-  }
+  const total = state.words.reduce((a, w) => a + w.count, 0);
+
+  const seedSample = () => {
+    const samples = ["새벽", "말씀", "회복", "평안", "회개", "공동체", "감사", "순종", "용서", "일터", "가정", "다음세대", "선교", "자녀", "부르심", "믿음", "광야", "쉼"];
+    void addWord(samples[Math.floor(Math.random() * samples.length)]);
+  };
 
   return (
-    <main className="min-h-screen bg-[#f4f6fb] px-5 py-8 text-slate-950">
-      <div className="mx-auto max-w-6xl">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <Link className="text-sm font-bold text-slate-500" href="/">
-              홈으로
-            </Link>
-            <h1 className="mt-4 text-4xl font-black tracking-tight">프레임 설정</h1>
-            <p className="mt-2 text-slate-500">
-              MVP에서는 프레임 프리셋을 세션별로 선택합니다. SVG path/PNG 업로드 편집기는 다음 단계로 확장합니다.
-            </p>
+    <div className="admin">
+      {/* ── Side panel ── */}
+      <aside className="admin-side">
+        <div className="brand">
+          <span className="brand-mark" />
+          <span className="brand-name">UPPER ROOM</span>
+        </div>
+
+        <div>
+          <div className="eyebrow" style={{ marginBottom: 6 }}>Step 01 · Word Cloud</div>
+          <h1>질문을 만들고<br />참여를 받아보세요.</h1>
+          <p className="desc" style={{ marginTop: 14 }}>참여자는 QR을 스캔해 단어를 보냅니다. 발표 화면에서 그 단어들이 실루엣 안에 모여 들어요.</p>
+        </div>
+
+        <div className="admin-form">
+          <div className="field">
+            <label>질문</label>
+            <textarea rows={2} value={state.question} onChange={e => void updateSession({ question: e.target.value })} />
           </div>
-          <Link className="rounded-full bg-slate-950 px-5 py-3 font-bold text-white" href="/present">
-            발표 화면 보기
-          </Link>
-        </header>
-
-        <section className="mt-8 grid gap-6 lg:grid-cols-[360px_1fr]">
-          <aside className="space-y-3">
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-600">
-              {isRemote ? "Supabase Session" : "Local Demo"}
-            </p>
-            {Object.values(frames).map((frame) => (
-              <button
-                className={[
-                  "w-full rounded-3xl border p-5 text-left transition",
-                  session.frameId === frame.id
-                    ? "border-emerald-500 bg-white shadow-xl shadow-emerald-100"
-                    : "border-slate-200 bg-white hover:border-slate-400",
-                ].join(" ")}
-                key={frame.id}
-                onClick={() => void handleFrameChange(frame.id)}
-                type="button"
-              >
-                <p className="text-xl font-black">{frame.name}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{frame.description}</p>
-              </button>
-            ))}
-          </aside>
-
-          <div className="rounded-[2rem] bg-white p-5 shadow-xl shadow-slate-200/70">
-            <div className="rounded-[1.5rem] bg-slate-50 p-5">
-              <FrameWordCloud
-                className="min-h-[560px]"
-                colors={session.colorTheme}
-                frameId={session.frameId}
-                words={previewWords}
-              />
+          <div className="field">
+            <label>안내 텍스트</label>
+            <input value={state.subtitle} onChange={e => void updateSession({ subtitle: e.target.value })} />
+          </div>
+          <div className="field">
+            <label>워드아트 모양</label>
+            <div className="shape-picker">
+              {SHAPE_KEYS.map(k => (
+                <button
+                  key={k}
+                  className={`shape-chip${state.shape === k ? " is-on" : ""}`}
+                  onClick={() => void updateSession({ shape: k })}
+                  type="button"
+                >
+                  <ShapeIcon kind={k} />
+                  <span className="lbl">{SHAPE_LABELS[k]}</span>
+                </button>
+              ))}
             </div>
           </div>
-        </section>
-      </div>
-    </main>
+        </div>
+
+        <div className="live-row">
+          <div>
+            <div className="lbl">실시간 응답</div>
+            <div className="num">{total}</div>
+          </div>
+          <span className="pill">{isRemote ? "Live" : "Demo"}</span>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => { if (window.confirm("모든 응답을 지울까요?")) void clearWords(); }}
+            type="button"
+          >
+            응답 초기화
+          </button>
+          <button className="btn btn-sm" onClick={seedSample} type="button">
+            + 샘플 단어
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Preview stage ── */}
+      <main className="admin-stage">
+        <canvas ref={canvasRef} className="bg" />
+        <div className="stage-head">
+          <span className="crumb">미리보기 · 발표 화면 슬라이드 1</span>
+          <div className="actions">
+            <Link className="btn btn-sm btn-ghost" href="/join">참여자 화면 열기</Link>
+            <Link className="btn btn-sm btn-warm" href="/present">▶ 발표 시작</Link>
+          </div>
+        </div>
+
+        <div className="q-card">
+          <div className="q-eyebrow">
+            <span className="num">1</span> WORD CLOUD · 단답형
+          </div>
+          <textarea
+            className="q-input"
+            rows={2}
+            value={state.question}
+            onChange={e => void updateSession({ question: e.target.value })}
+          />
+          <input
+            className="q-sub"
+            value={state.subtitle}
+            onChange={e => void updateSession({ subtitle: e.target.value })}
+          />
+          <div className="my-words" style={{ marginTop: 28 }}>
+            {state.words.slice(0, 12).map(w => (
+              <span key={w.id} className="my-word">
+                {w.text}<small>{w.count}</small>
+              </span>
+            ))}
+            {state.words.length > 12 && (
+              <span className="my-word" style={{ background: "transparent", borderColor: "var(--line)", color: "var(--ink-faint)" }}>
+                +{state.words.length - 12}
+              </span>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* ── Nav bar ── */}
+      <nav className="route-bar">
+        <button className="is-active" type="button"><span className="dot" />SETUP</button>
+        <Link href="/join" style={{ display: "contents" }}><button type="button">JOIN</button></Link>
+        <Link href="/responses" style={{ display: "contents" }}><button type="button">RESPONSES</button></Link>
+        <Link href="/present" style={{ display: "contents" }}><button type="button">PRESENT</button></Link>
+      </nav>
+    </div>
   );
 }
