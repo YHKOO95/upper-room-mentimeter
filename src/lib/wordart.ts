@@ -357,9 +357,7 @@ export class WordArt {
       n.style.top = p.y + "px";
       n.style.fontSize = p.size + "px";
       n.style.color = isHero ? this.accent : `rgba(244,239,230,${(0.55 + 0.45 * t).toFixed(3)})`;
-      n.style.textShadow = isHero
-        ? `0 0 28px rgba(246,213,138,.45), 0 0 8px rgba(246,213,138,.6)`
-        : `0 0 12px rgba(255,255,255,${(0.05 + 0.10 * t).toFixed(3)})`;
+      n.style.textShadow = "none";
       n.style.fontWeight = i < 5 ? "800" : i < 12 ? "700" : "600";
     });
 

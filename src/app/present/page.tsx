@@ -86,15 +86,15 @@ export default function PresentPage() {
               />
               <small>SCAN TO JOIN</small>
             </div>
-            <div>CODE · <span style={{ color: "var(--ink)", fontWeight: 700, letterSpacing: ".2em" }}>{state.code}</span></div>
+            {/* <div>CODE · <span style={{ color: "var(--ink)", fontWeight: 700, letterSpacing: ".2em" }}>{state.code}</span></div> */}
           </div>
         </header>
 
         <div className="canvas-area">
-          <div className="window-glow" />
           {state.shape === "poster" && (
             <div className="poster-house" aria-hidden="true">
-              <div className="poster-house-window" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/upper-room-window.jpeg" className="poster-house-window" alt="" />
             </div>
           )}
           <div className="wordart" ref={stageRef} />

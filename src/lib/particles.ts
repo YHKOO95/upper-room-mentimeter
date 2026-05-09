@@ -67,13 +67,13 @@ export class Particles {
   private make(initial: boolean): Particle {
     const W = this.W, H = this.H;
     const side = Math.random() < 0.5 ? -1 : 1;
-    const srcX = W * 0.5 + side * (W * 0.05 + Math.random() * W * 0.10);
+    const srcX = W * 0.5 + side * (W * 0.08 + Math.random() * W * 0.28);
     const srcY = H * (initial ? Math.random() : 0.85 + Math.random() * 0.2);
-    const angle = -Math.PI / 2 + side * (0.18 + Math.random() * 0.30);
+    const angle = -Math.PI / 2 + side * (0.10 + Math.random() * 0.65);
     const speed = (0.15 + Math.random() * 0.55) * this.opts.speed;
     const size = Math.pow(Math.random(), 2.4) * 2.6 + 0.3;
     return {
-      x: srcX + (Math.random() - 0.5) * W * 0.05,
+      x: srcX + (Math.random() - 0.5) * W * 0.10,
       y: srcY,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,

@@ -232,10 +232,10 @@ input, textarea { font-family: inherit }
 }
 .poster-house-window {
   position: absolute; left: 50%; top: 38%; transform: translate(-50%,-50%);
-  width: 18%; aspect-ratio: 1/1.05; border-radius: 3px;
-  background: linear-gradient(180deg,#fff8dc 0%,#ffe9a8 40%,#f6d58a 100%);
-  box-shadow: 0 0 50px 14px rgba(255,233,168,.6), 0 0 110px 36px rgba(246,213,138,.35);
-  animation: windowPulse 4s ease-in-out infinite;
+  width: 52%; aspect-ratio: 4/5; border-radius: 4px;
+  object-fit: cover; object-position: center center;
+  /* box-shadow: 0 0 60px 18px rgba(255,233,168,.55), 0 0 130px 44px rgba(246,213,138,.35); */
+  /* animation: windowPulse 4s ease-in-out infinite; */
 }
 
 .shape-attic .window-glow { top: 46%; width: 90px; height: 90px }
