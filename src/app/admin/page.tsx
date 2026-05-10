@@ -69,17 +69,27 @@ export default function AdminPage() {
           <span className="pill">{isRemote ? "Live" : "Demo"}</span>
         </div>
 
-        <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
+        <div style={{ display: "flex", gap: 8, marginTop: "auto", flexDirection: "column" }}>
           <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => { if (window.confirm("모든 응답을 지울까요?")) void clearWords(); }}
+            className={`btn btn-sm${state.isAcceptingResponses ? " btn-warm" : ""}`}
+            style={!state.isAcceptingResponses ? { borderColor: "rgba(255,122,122,.5)", color: "#ff9a9a" } : undefined}
+            onClick={() => void updateSession({ isAcceptingResponses: !state.isAcceptingResponses })}
             type="button"
           >
-            응답 초기화
+            {state.isAcceptingResponses ? "● 응답 받는 중" : "○ 응답 잠금됨"}
           </button>
-          <button className="btn btn-sm" onClick={seedSample} type="button">
-            + 샘플 단어
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => { if (window.confirm("모든 응답을 지울까요?")) void clearWords(); }}
+              type="button"
+            >
+              응답 초기화
+            </button>
+            <button className="btn btn-sm" onClick={seedSample} type="button">
+              + 샘플 단어
+            </button>
+          </div>
         </div>
       </aside>
 

@@ -31,7 +31,7 @@ export default function JoinPage() {
 
   const submit = async () => {
     const t = val.trim();
-    if (!t || isSubmitting) return;
+    if (!t || isSubmitting || !state.isAcceptingResponses) return;
     setIsSubmitting(true);
     try {
       await addWord(t);
@@ -65,31 +65,52 @@ export default function JoinPage() {
 
           <div className="phone-q">{state.question}</div>
 
-          <div className="phone-input-wrap">
-            <input
-              ref={inputRef}
-              className="phone-input"
-              placeholder="한 단어로 적어주세요…"
-              value={val}
-              onChange={e => setVal(e.target.value)}
-              onKeyDown={handleKeyDown}
-              maxLength={24}
-              disabled={isSubmitting}
-              autoFocus
-            />
-            <button
-              className="phone-send"
-              onClick={() => void submit()}
-              disabled={isSubmitting}
-              aria-label="보내기"
-              type="button"
-            >
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {state.isAcceptingResponses ? (
+            <>
+              <div className="phone-input-wrap">
+                <input
+                  ref={inputRef}
+                  className="phone-input"
+                  placeholder="한 단어로 적어주세요…"
+                  value={val}
+                  onChange={e => setVal(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  maxLength={24}
+                  disabled={isSubmitting}
+                  autoFocus
+                />
+                <button
+                  className="phone-send"
+                  onClick={() => void submit()}
+                  disabled={isSubmitting}
+                  aria-label="보내기"
+                  type="button"
+                >
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <div className="phone-helper">{val.length}/24 · 여러 번 보낼 수 있어요</div>
+            </>
+          ) : (
+            <div style={{
+              marginTop: 34, padding: "24px 20px", borderRadius: 14,
+              border: "1px solid var(--line)", background: "rgba(255,255,255,.03)",
+              textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+            }}>
+              <svg viewBox="0 0 24 24" fill="none" style={{ width: 28, height: 28, color: "var(--ink-faint)" }}>
+                <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.7" />
+                <path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
               </svg>
-            </button>
-          </div>
-          <div className="phone-helper">{val.length}/24 · 여러 번 보낼 수 있어요</div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--ink)" }}>
+                지금은 응답을 받지 않습니다
+              </div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ink-faint)" }}>
+                다음 주에 만나요!
+              </div>
+            </div>
+          )}
 
           {mine.length > 0 && (
             <>

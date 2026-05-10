@@ -15,6 +15,7 @@ export type StoreState = {
   question: string;
   subtitle: string;
   shape: ShapeKind;
+  isAcceptingResponses: boolean;
   words: WordEntry[];
 };
 
@@ -34,6 +35,7 @@ function defaultState(): StoreState {
     question: "",
     subtitle: "",
     shape: DEFAULT_SHAPE,
+    isAcceptingResponses: true,
     words: SEED_WORDS.map(([t, c]) => ({
       id: cryptoId(),
       text: t as string,
@@ -122,6 +124,7 @@ export function useWordStore() {
       code: DEFAULT_SESSION_CODE,
       question: sessionRow?.question ?? prev.question,
       shape: (sessionRow?.frame_id as ShapeKind | undefined) ?? DEFAULT_SHAPE,
+      isAcceptingResponses: sessionRow?.is_accepting_responses ?? true,
       words,
     }));
     setIsRemote(true);
@@ -250,12 +253,13 @@ export function useWordStore() {
   // Updates question / subtitle in Supabase + local state.
   // subtitle is not stored in DB (no column) — always local only.
   const updateSession = useCallback(async (
-    patch: Partial<Pick<StoreState, "question" | "subtitle" | "shape">>,
+    patch: Partial<Pick<StoreState, "question" | "subtitle" | "shape" | "isAcceptingResponses">>,
   ) => {
     if (supabase) {
-      const dbPatch: { question?: string; frame_id?: string } = {};
+      const dbPatch: { question?: string; frame_id?: string; is_accepting_responses?: boolean } = {};
       if (patch.question !== undefined) dbPatch.question = patch.question;
       if (patch.shape !== undefined) dbPatch.frame_id = patch.shape;
+      if (patch.isAcceptingResponses !== undefined) dbPatch.is_accepting_responses = patch.isAcceptingResponses;
       if (Object.keys(dbPatch).length > 0) {
         await supabase.from("presentation_sessions")
           .update(dbPatch)
